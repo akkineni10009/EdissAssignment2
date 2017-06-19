@@ -33,17 +33,21 @@ var mc = mysql.createConnection({
 })*/
  
 // connect to database
+console.log("Connection established");
 mc.connect();
  
 app.post('/login', function(req,res){
 	var username = req.body.username;
 	var password = req.body.password;
 	
+	   console.log("Connection established");
 	   mc.query('select * from userdetails where username=? and password=?',[username,password],function(err, rows){
 		   
 		   if(err)
 		   {
+			   console.log(err);
 			   mc.end();   
+			   throw err;
 		   }
 		   
 		   else if (!err && rows.length>0)
@@ -595,7 +599,7 @@ app.post('/viewProducts', function(req,res){
 });
 
 
-
+mc.end();
 
 // port must be set to 8080 because incoming http requests are routed from port 80 to port 8080
 app.listen(8080, function () {

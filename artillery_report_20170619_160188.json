@@ -1,0 +1,166 @@
+{
+  "aggregate": {
+    "timestamp": "2017-06-19T20:02:21.942Z",
+    "scenariosCreated": 20,
+    "scenariosCompleted": 0,
+    "requestsCompleted": 1,
+    "latency": {
+      "min": 66.5,
+      "max": 66.5,
+      "median": 66.5,
+      "p95": null,
+      "p99": null
+    },
+    "rps": {
+      "count": 21,
+      "mean": 1.03
+    },
+    "scenarioDuration": {
+      "min": null,
+      "max": null,
+      "median": null,
+      "p95": null,
+      "p99": null
+    },
+    "scenarioCounts": {
+      "login not registered": 20
+    },
+    "errors": {
+      "ECONNRESET": 2,
+      "ECONNREFUSED": 17,
+      "ETIMEDOUT": 1
+    },
+    "codes": {
+      "200": 1
+    },
+    "matches": 1,
+    "customStats": {},
+    "phases": [
+      {
+        "duration": 20,
+        "arrivalCount": 20
+      }
+    ]
+  },
+  "intermediate": [
+    {
+      "timestamp": "2017-06-19T20:02:09.047Z",
+      "scenariosCreated": 8,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 1,
+      "latency": {
+        "min": 66.5,
+        "max": 66.5,
+        "median": 66.5,
+        "p95": null,
+        "p99": null
+      },
+      "rps": {
+        "count": 9,
+        "mean": 1.19
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "login not registered": 8
+      },
+      "errors": {
+        "ECONNRESET": 2,
+        "ECONNREFUSED": 3
+      },
+      "codes": {
+        "200": 1
+      },
+      "matches": 1,
+      "latencies": [
+        [
+          1497902521525,
+          "2a778c6b-7443-4a5d-8458-2fdae766dca2",
+          66458323,
+          200
+        ]
+      ],
+      "customStats": {},
+      "concurrency": 3,
+      "pendingRequests": 33
+    },
+    {
+      "timestamp": "2017-06-19T20:02:19.109Z",
+      "scenariosCreated": 10,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 0,
+      "latency": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "rps": {
+        "count": 10,
+        "mean": 1.03
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "login not registered": 10
+      },
+      "errors": {
+        "ECONNREFUSED": 10
+      },
+      "codes": {},
+      "matches": 0,
+      "latencies": [],
+      "customStats": {},
+      "concurrency": 3,
+      "pendingRequests": 135
+    },
+    {
+      "timestamp": "2017-06-19T20:02:21.914Z",
+      "scenariosCreated": 2,
+      "scenariosCompleted": 0,
+      "requestsCompleted": 0,
+      "latency": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "rps": {
+        "count": 2,
+        "mean": 0.8
+      },
+      "scenarioDuration": {
+        "min": null,
+        "max": null,
+        "median": null,
+        "p95": null,
+        "p99": null
+      },
+      "scenarioCounts": {
+        "login not registered": 2
+      },
+      "errors": {
+        "ECONNREFUSED": 4,
+        "ETIMEDOUT": 1
+      },
+      "codes": {},
+      "matches": 0,
+      "latencies": [],
+      "customStats": {},
+      "concurrency": 3,
+      "pendingRequests": 79
+    }
+  ]
+}
