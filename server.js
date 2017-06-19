@@ -109,6 +109,8 @@ app.post('/registerUser',function(req,res){
 		if(err)
 		{
 			//mc.end();
+			console.log(err);
+			throw err;
 		}
 		
 		else if(rows.length>=1)
