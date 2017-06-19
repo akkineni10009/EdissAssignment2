@@ -123,7 +123,7 @@ app.post('/registerUser',function(req,res){
 				}
 				else
 				{
-					res.json({'message':username + ' was registered successfully'});	
+					res.json({'message':fname + ' was registered successfully'});	
 				}
 			});			
 		}
@@ -383,7 +383,7 @@ app.post('/addProducts', function(req,res){
 	}
 });
 
-app.post('/modifyProducts', function(req,res){
+app.post('/modifyProduct', function(req,res){
 	var asin = req.body.asin;
 	var productName = req.body.productName;
 	var productDescription = req.body.productDescription;
@@ -402,7 +402,7 @@ app.post('/modifyProducts', function(req,res){
 		
 		else
 		{
-			mc.query('update products set productName=?, productDescription=?, groups=? where username=?',[productName,productDescription,group,asin],function(err,results){
+			mc.query('update products set productName=?, productDescription=? where username=? and groups=? ',[productName,productDescription,asin,group],function(err,results){
 			if(err)
 			{
 				console.log(err);
@@ -516,7 +516,7 @@ app.post('/viewProducts', function(req,res){
 	var group=req.body.group;
 	var json=req.body;
 	var where_clause="";
-    var query= "select asin,productname from products where ";
+    var query= "select asin,productName from products where ";
 	
 	if(("asin" in json)==false && ("keyword" in json)==false && ("group" in json)==false)
 	{
@@ -548,11 +548,11 @@ app.post('/viewProducts', function(req,res){
 	   keyword = '%'.concat(keyword.concat('%'));
 	   if(where_clause=='')
 	   {
-		   where_clause += " productname like '"+ keyword +"'" + " or " + " productdescription like '"+ keyword +"'";
+		   where_clause += " productName like '"+ keyword +"'" + " or " + " productDescription like '"+ keyword +"'";
 	   }
 	   else
 	   {  
-		   where_clause += " and (" + " productname like '"+ keyword +"'" + " or " + " productdescription like '"+ keyword +"')";
+		   where_clause += " and (" + " productName like '"+ keyword +"'" + " or " + " productDescription like '"+ keyword +"')";
 	   }
 	}
 	
