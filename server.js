@@ -6,7 +6,7 @@ var session = require('express-session');
 
 app.use(session({
     secret: 'Ajay',
-    cookie:{maxAge: 1*60*1000}, 
+    cookie:{maxAge: 15*60*1000}, 
 	resave: true,
 	rolling:true,
 	saveUninitialized:true
