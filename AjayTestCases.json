@@ -1,6 +1,6 @@
 {
   "config": {
-    "target": "http://localhost:8080",
+    "target": "http://ec2-52-91-162-76.compute-1.amazonaws.com:8080",
     "phases": [
       {"duration": 1, "arrivalCount": 1}
     ],
