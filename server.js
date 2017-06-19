@@ -83,6 +83,15 @@ app.post('/logout',function(req,res){
 
 app.post('/registerUser',function(req,res){
 	console.log(req.body);
+	if(!(req.body.fname) || !(req.body.lname) ||!(req.body.address) || !(req.body.city) || !(req.body.state) || !(req.body.zip) || !(req.body.email)|| !(req.body.username) || !(req.body.password))
+	{
+       res.json({'message':'The input you provided is not valid'});
+	}
+	
+	else
+	{
+		
+	
 	var fname = req.body.fname;
 	var lname = req.body.lname;
 	var address = req.body.address;
@@ -97,18 +106,12 @@ app.post('/registerUser',function(req,res){
 	if(!role) role='user';
 		
 	
-	if(fname=='' || lname=='' || address=='' || city=='' || state=='' || zip=='' || email=='' || username=='' || password=='')
-    {
-		res.json({'message':'The input you provided is not valid'});
-	}
-	
-	else
-	{
 	  mc.query('select * from userdetails where username=?',[username],function(err,rows){
-		
+		console.log("query executed");
 		if(err)
 		{
 			//mc.end();
+			console.log("in err");
 			console.log(err);
 			throw err;
 		}
