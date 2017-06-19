@@ -1,19 +1,19 @@
 {
   "aggregate": {
-    "timestamp": "2017-06-19T19:45:15.930Z",
+    "timestamp": "2017-06-19T20:36:36.245Z",
     "scenariosCreated": 20,
     "scenariosCompleted": 0,
-    "requestsCompleted": 1,
+    "requestsCompleted": 0,
     "latency": {
-      "min": 100.2,
-      "max": 100.2,
-      "median": 100.2,
+      "min": null,
+      "max": null,
+      "median": null,
       "p95": null,
       "p99": null
     },
     "rps": {
-      "count": 21,
-      "mean": 1.02
+      "count": 20,
+      "mean": 0.97
     },
     "scenarioDuration": {
       "min": null,
@@ -26,13 +26,11 @@
       "login not registered": 20
     },
     "errors": {
-      "ECONNRESET": 2,
-      "ECONNREFUSED": 18
+      "ECONNRESET": 1,
+      "ECONNREFUSED": 19
     },
-    "codes": {
-      "200": 1
-    },
-    "matches": 1,
+    "codes": {},
+    "matches": 0,
     "customStats": {},
     "phases": [
       {
@@ -43,20 +41,20 @@
   },
   "intermediate": [
     {
-      "timestamp": "2017-06-19T19:45:02.795Z",
+      "timestamp": "2017-06-19T20:36:23.537Z",
       "scenariosCreated": 8,
       "scenariosCompleted": 0,
-      "requestsCompleted": 1,
+      "requestsCompleted": 0,
       "latency": {
-        "min": 100.2,
-        "max": 100.2,
-        "median": 100.2,
+        "min": null,
+        "max": null,
+        "median": null,
         "p95": null,
         "p99": null
       },
       "rps": {
-        "count": 9,
-        "mean": 1.22
+        "count": 8,
+        "mean": 1.02
       },
       "scenarioDuration": {
         "min": null,
@@ -69,27 +67,18 @@
         "login not registered": 8
       },
       "errors": {
-        "ECONNRESET": 2,
-        "ECONNREFUSED": 4
+        "ECONNRESET": 1,
+        "ECONNREFUSED": 3
       },
-      "codes": {
-        "200": 1
-      },
-      "matches": 1,
-      "latencies": [
-        [
-          1497901495520,
-          "eecd0d20-05f7-4cd4-aa9a-081da04c3469",
-          100185356,
-          200
-        ]
-      ],
+      "codes": {},
+      "matches": 0,
+      "latencies": [],
       "customStats": {},
-      "concurrency": 2,
-      "pendingRequests": 31
+      "concurrency": 4,
+      "pendingRequests": 32
     },
     {
-      "timestamp": "2017-06-19T19:45:12.875Z",
+      "timestamp": "2017-06-19T20:36:33.566Z",
       "scenariosCreated": 10,
       "scenariosCompleted": 0,
       "requestsCompleted": 0,
@@ -102,7 +91,7 @@
       },
       "rps": {
         "count": 10,
-        "mean": 1.05
+        "mean": 1.01
       },
       "scenarioDuration": {
         "min": null,
@@ -115,17 +104,17 @@
         "login not registered": 10
       },
       "errors": {
-        "ECONNREFUSED": 11
+        "ECONNREFUSED": 13
       },
       "codes": {},
       "matches": 0,
       "latencies": [],
       "customStats": {},
-      "concurrency": 2,
+      "concurrency": 4,
       "pendingRequests": 135
     },
     {
-      "timestamp": "2017-06-19T19:45:15.877Z",
+      "timestamp": "2017-06-19T20:36:36.192Z",
       "scenariosCreated": 2,
       "scenariosCompleted": 0,
       "requestsCompleted": 0,
@@ -138,7 +127,7 @@
       },
       "rps": {
         "count": 2,
-        "mean": 0.79
+        "mean": 0.78
       },
       "scenarioDuration": {
         "min": null,

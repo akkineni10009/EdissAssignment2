@@ -46,7 +46,7 @@ app.post('/login', function(req,res){
 		   if(err)
 		   {
 			   console.log(err);
-			   mc.end();   
+			   //mc.end();   
 			   throw err;
 		   }
 		   
@@ -108,7 +108,7 @@ app.post('/registerUser',function(req,res){
 		
 		if(err)
 		{
-			mc.end();
+			//mc.end();
 		}
 		
 		else if(rows.length>=1)
@@ -123,7 +123,7 @@ app.post('/registerUser',function(req,res){
 			mc.query('insert into userdetails values (?,?,?,?,?,?,?,?,?,?,?)',[fname,lname,address,city,state,zip,email,username,password,userId,role],function(err,results){
 				if(err)
 				{
-					mc.end();
+					//mc.end();
 				}
 				else
 				{
@@ -274,7 +274,7 @@ app.post('/updateInfo',function(req,res){
 			if(err)
 			{
 					console.log(err);
-					mc.end();
+					//mc.end();
 			}
 			
 			else if(rows.length>=1)
@@ -290,7 +290,7 @@ app.post('/updateInfo',function(req,res){
 				if(err)
 				{
 					console.log(err);
-					mc.end();
+					//mc.end();
 				}
 				
 				else
@@ -345,7 +345,7 @@ app.post('/addProducts', function(req,res){
 		if(err)
 		{
 			console.log(err);
-			mc.end();
+			//mc.end();
 		}
 		
 		else if(results.length>=1)
@@ -360,7 +360,7 @@ app.post('/addProducts', function(req,res){
 			if(err)
 			{
 				console.log(err);
-				mc.end();
+				//mc.end();
 			}
 		
 			else
@@ -410,7 +410,7 @@ app.post('/modifyProduct', function(req,res){
 			if(err)
 			{
 				console.log(err);
-				mc.end();
+				//mc.end();
 			}
 		
 			else
@@ -483,7 +483,7 @@ app.post('/viewUsers', function(req,res){
 			if(err)
 			{
 				console.log(err);
-				mc.end();
+				//mc.end();
 			}
 		
 			else
@@ -568,7 +568,7 @@ app.post('/viewProducts', function(req,res){
 		if(err)
 		{
 			console.log(err);
-			mc.end();
+			//mc.end();
 		}
 		
 			else
@@ -599,7 +599,7 @@ app.post('/viewProducts', function(req,res){
 });
 
 
-mc.end();
+//mc.end();
 
 // port must be set to 8080 because incoming http requests are routed from port 80 to port 8080
 app.listen(8080, function () {
