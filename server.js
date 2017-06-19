@@ -326,6 +326,11 @@ app.post('/updateInfo',function(req,res){
 });
 
 app.post('/addProducts', function(req,res){
+	var asin = req.body.asin;
+	var productName = req.body.productName;
+	var productDescription = req.body.productDescription;
+	var group =  req.body.group;
+	var username=req.body.asin;
 	
 	if(req.session.username)
 	{
@@ -333,18 +338,13 @@ app.post('/addProducts', function(req,res){
 	  if(req.session.admin)
 	  {
 		  
-		  if(!(req.body.asin)=='' || !(req.body.productName)=='' || !(req.body.productDescription)=='' || !(req.body.group)=='')
+		  if(asin=='' || productName=='' || productDescription=='' || group=='')
 		  {
 			res.json({'message':'The input you provided is not valid'});	
 		  }
 	       
           else
 	     {
-		   var asin = req.body.asin;
-		   var productName = req.body.productName;
-	       var productDescription = req.body.productDescription;
-	       var group =  req.body.group;
-	       var username=req.body.asin;
 		   mc.query('select * from products where username = ?',[asin],function(err,results){
 		 
 		if(err)
@@ -393,24 +393,24 @@ app.post('/addProducts', function(req,res){
 });
 
 app.post('/modifyProduct', function(req,res){
+	var asin = req.body.asin;
+	var productName = req.body.productName;
+	var productDescription = req.body.productDescription;
+	var group =  req.body.group;
+	var username=req.body.asin;
 	
   if(req.session.username)
   {
 	if(req.session.admin)
      {
 		
-		if(!(req.body.asin)=='' || !(req.body.productName)=='' || !(req.body.productDescription)=='' || !(req.body.group)=='')
-		  {
+		if(asin=='' || productName=='' || productDescription=='' || group=='')
+		{
 			res.json({'message':'The input you provided is not valid'});	
-		  }
+		}
 		
 		else
 		{
-			var asin = req.body.asin;
-			var productName = req.body.productName;
-			var productDescription = req.body.productDescription;
-			var group =  req.body.group;
-			var username=req.body.asin;
 			mc.query('update products set productName=?, productDescription=? where username=? and groups=? ',[productName,productDescription,asin,group],function(err,results){
 			if(err)
 			{
