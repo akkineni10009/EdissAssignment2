@@ -607,8 +607,152 @@ app.post('/viewProducts', function(req,res){
 			});
 });
 
+app.post('/buyProducts', function(req,res){
+	
+  if(req.session.username)
+  {
+		var temp=true;
+		var inputproducts = req.body.products;
+		var requestsLength = inputproducts.length;
+        var products=[];
+		
+		for(var i=0;i<requestsLength;i++)
+		{
+			products[i]= inputproducts[i].asin;
+		}
+		
+		for(var i=0;i<requestsLength;i++)
+		{
+			var currentasin=products[i];
+			mc.query('select * from products where asin=?',[currentasin],function(err, rows){
+		    if(rows.length<=0)
+		    {
+			   res.json({'message':'There are no products that match that criteria'});	   
+		    }
+		    });
+		}
+		// Update the items purchaed by the customer
+		for(var i=0;i<requestsLength;i++)
+		{
+			var currentasin=products[i];
+			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentasin],function(err,results){
+		    if(err)
+		    {
+			  console.log(err);
+			  res.json({'message':'There are no products that match that criteria'});
+			  //mc.end();
+		    }
+			});	
+		}
+		
+		// Update for recommendation
+		for(var i=0;i<requestsLength-1;i++)
+		{
+		   	for(var j=i+1;j<requestsLength;j++)
+		    {     
+				for(var k=j-1;k>=0;k--)
+				{
+					if(products[j]==products[k])
+					{
+						temp=false;
+						break;
+					}  
+				}
+				if(temp)
+				{
+				    mc.query('insert into productsPurchasedTogether values (?,?)',[currentasin,nextasin],function(err,results){
+		            if(err)
+		            {
+			         console.log(err);
+			         //mc.end();
+			         res.json({'message':'There are no products that match that criteria'});
+		            }
+		            });	
+					
+					mc.query('insert into productsPurchasedTogether values (?,?)',[nextasin,currentasin],function(err,results){
+		            if(err)
+		            {
+			         console.log(err);
+			         //mc.end();
+			         res.json({'message':'There are no products that match that criteria'});
+		            }
+		            });
+				}
+			}				  
+		}
+	  res.json({'message':'The action was successful'});	
+	}
+	
+  else
+  {
+	  res.json({'message':'You are not currently logged in'});
+  }
+});
 
-//mc.end();
+app.post('/productsPurchased', function(req,res){
+	
+  if(req.session.username)
+  {
+	if(req.session.admin)
+    {
+		mc.query('select * from userdetails where username=?',[req.body.username],function(err, rows){
+		   
+		   if (err || rows.length<=0)
+		   {
+			   res.json({'message':'There are no users that match that criteria'});
+		   }
+		   
+		   else
+		   {
+			   mc.query('select productName, count(productName) as quantity from productsPurchasedByCustomer where username=? group by productName ',[req.body.username],function(err, rows){
+		   
+		        if (err || rows.length<=0)
+		        {
+			      res.json({'message':'There are no users that match that criteria'});
+		        }
+				
+				else
+				{
+					res.json({'message':'The action was successful', 'products':rows});
+				}
+		   
+	          });
+		   }
+		   
+	   });
+	}
+	else
+	{
+		 res.json({'message':'You must be an admin to perform this action'});
+	}
+  }
+  else
+  {
+	  res.json({'message':'You are not currently logged in'});
+  }
+});
+
+
+app.post('/getRecommendations', function(req,res){
+	var asin = req.body.asin;
+	mc.query('select * from productsPurchasedTogether where product1=?',[asin],function(err, rows){
+		   
+	if (err || rows.length<=0)
+	{
+	   res.json({'message':'There are no recommendations for that product'});
+	}
+		   
+	else
+	{
+	     mc.query('select asin from ( select product2 as asin , count(*) as cnt from productsPurchasedTogether where product1=? group by product2 order by cnt desc limit 5  ) as temp',[asin],function(err, rows){
+			res.json({'message':'The action was successful', 'products':rows});
+		 });
+	}
+		   
+    });
+	
+});
+
 
 // port must be set to 8080 because incoming http requests are routed from port 80 to port 8080
 app.listen(8080, function () {
