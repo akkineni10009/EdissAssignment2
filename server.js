@@ -3,16 +3,16 @@ var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var session = require('express-session');
-//var redis = require("redis");
-//var redisStore = require('connect-redis')(session);
-//var client = redis.createClient(6379,'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', {no_ready_check: true});
+var redis = require("redis");
+var redisStore = require('connect-redis')(session);
+var client = redis.createClient(6379,'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', {no_ready_check: true});
 
 app.use(session({
     secret: 'Ajay',
     cookie:{maxAge: 15*60*1000}, 
 	resave: true,
 	rolling:true,
-	//store: new redisStore({ host: 'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', port:6379, client:client,ttl:260}),
+	store: new redisStore({ host: 'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', port:6379, client:client,ttl:260}),
 	saveUninitialized:true
 }))
 
@@ -37,7 +37,7 @@ app.use(bodyParser.urlencoded({
 })*/
 
 var poolRead = mysql.createPool({
-    connectionLimit : 600, 
+    connectionLimit:600, 
     host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
     user: 'akkineni10009',
     password: 'Pedapadu1',
@@ -46,7 +46,8 @@ var poolRead = mysql.createPool({
     debug    :  false
 });
 var poolWrite = mysql.createPool({
-    host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
+    connectionLimit:600, 
+	host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
     user: 'akkineni10009',
     password: 'Pedapadu1',
     database: 'Ediss',
