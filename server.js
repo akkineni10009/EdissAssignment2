@@ -3,16 +3,16 @@ var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var session = require('express-session');
-var redis = require("redis");
-var redisStore = require('connect-redis')(session);
-var client = redis.createClient(6379,'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', {no_ready_check: true});
+//var redis = require("redis");
+//var redisStore = require('connect-redis')(session);
+//var client = redis.createClient(6379,'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', {no_ready_check: true});
 
 app.use(session({
     secret: 'Ajay',
     cookie:{maxAge: 15*60*1000}, 
 	resave: true,
 	rolling:true,
-	store: new redisStore({ host: 'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', port:6379, client:client,ttl:260}),
+	//store: new redisStore({ host: 'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', port:6379, client:client,ttl:260}),
 	saveUninitialized:true
 }))
 
@@ -22,12 +22,12 @@ app.use(bodyParser.urlencoded({
 }));
  
 // connection configurations
-var mc = mysql.createConnection({
+/*var mc = mysql.createConnection({
     host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
     user: 'akkineni10009',
     password: 'Pedapadu1',
     database: 'Ediss'
-});
+});*/
 
 /*var mc = mysql.createConnection({
     host: '127.0.0.1',
@@ -35,16 +35,35 @@ var mc = mysql.createConnection({
     password: 'root',
     database: 'ediss'
 })*/
+
+var poolRead = mysql.createPool({
+    connectionLimit : 600, 
+    host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
+    user: 'akkineni10009',
+    password: 'Pedapadu1',
+    database: 'Ediss',
+    port     : '3306',
+    debug    :  false
+});
+var poolWrite = mysql.createPool({
+    host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
+    user: 'akkineni10009',
+    password: 'Pedapadu1',
+    database: 'Ediss',
+    port     : '3306',
+    debug    :  false
+});
  
 // connect to database
 console.log("Connection established");
-mc.connect();
+//mc.connect();
  
 app.post('/login', function(req,res){
 	var username = req.body.username;
 	var password = req.body.password;
 	
 	   console.log("Connection established");
+	   poolRead.getConnection(function(err,mc){
 	   mc.query('select * from userdetails where username=? and password=?',[username,password],function(err, rows){
 		   
 		   if(err)
@@ -68,8 +87,7 @@ app.post('/login', function(req,res){
 			   res.json({'message':'There seems to be an issue with the username/password combination that you entered'});
 		   }
 		   
-	   });
-	
+	   }); });
 });
 
 app.post('/logout',function(req,res){
@@ -110,6 +128,7 @@ app.post('/registerUser',function(req,res){
 	if(!role) role='user';
 		
 	
+	  poolRead.getConnection(function(err,mc){
 	  mc.query('select * from userdetails where username=?',[username],function(err,rows){
 		console.log("query executed");
 		if(err)
@@ -129,6 +148,7 @@ app.post('/registerUser',function(req,res){
 		{
 			//var sqlquery= "insert into userdetails values (?,?,?,?,?,?,?,?,?)",[fname,lname,address,city,state,zip,email,username,password];
 			//console.log(sqlquery);
+			poolWrite.getConnection(function(err,mc){
 			mc.query('insert into userdetails values (?,?,?,?,?,?,?,?,?,?,?)',[fname,lname,address,city,state,zip,email,username,password,userId,role],function(err,results){
 				if(err)
 				{
@@ -138,11 +158,10 @@ app.post('/registerUser',function(req,res){
 				{
 					res.json({'message':fname + ' was registered successfully'});	
 				}
-			});			
+			});	});		
 		}
 	
-	});
-	
+	}); });
 	}
 });
 
@@ -279,6 +298,7 @@ app.post('/updateInfo',function(req,res){
 	
 	else
 	{
+		poolRead.getConnection(function(err,mc){
 		mc.query('select * from userdetails where username=?',[username],function(err,rows){
 			if(err)
 			{
@@ -286,7 +306,7 @@ app.post('/updateInfo',function(req,res){
 					//mc.end();
 			}
 			
-			else if(rows.length>=1)
+			else if(rows.length<=0)
 			{
 					res.json({'message':'The input you provided is not valid'});
 			}
@@ -294,7 +314,7 @@ app.post('/updateInfo',function(req,res){
 			else
 			{
 				console.log(query);	
-				
+				poolWrite.getConnection(function(err,mc){
 				mc.query(query,function(err,results){
 				if(err)
 				{
@@ -307,18 +327,19 @@ app.post('/updateInfo',function(req,res){
 					console.log(username);
 					console.log(session_user);
 					req.session.username=username;
+					poolRead.getConnection(function(err,mc){
 					mc.query('select fname from userdetails where username=?',[username],function(err,rows){
 							
 						
 						res.json({'message':rows[0].fname + ' your information was successfully updated'});	
 							
-					});
+					}); });
 					
 				}
 				
-			 });	
+			}); });	
 			}
-	   });
+	}); });
 			
 	}
   }
@@ -349,7 +370,8 @@ app.post('/addProducts', function(req,res){
 	       var productDescription = req.body.productDescription;
 	       var group =  req.body.group;
 	       var username=req.body.asin;
-		   mc.query('select * from products where username = ?',[asin],function(err,results){
+         poolWrite.getConnection(function(err,mc){		 
+		 mc.query('select * from products where username = ?',[asin],function(err,results){
 		 
 		if(err)
 		{
@@ -364,6 +386,7 @@ app.post('/addProducts', function(req,res){
 		
 		else
 		{
+			poolWrite.getConnection(function(err,mc){
 			mc.query('insert into products values (?,?,?,?,?)',[username,asin,productName,productDescription,group],function(err,results){
 		
 			if(err)
@@ -376,9 +399,9 @@ app.post('/addProducts', function(req,res){
 			{
 				res.json({'message':productName + ' was successfully added to the system'});	
 			}
-			});
+			});});
 		}
-	});
+		 });});
 		  
     }
 	
@@ -415,6 +438,7 @@ app.post('/modifyProduct', function(req,res){
 			var productDescription = req.body.productDescription;
 			var group =  req.body.group;
 			var username=req.body.asin;
+			poolWrite.getConnection(function(err,mc){
 			mc.query('update products set productName=?, productDescription=? where username=? and groups=? ',[productName,productDescription,asin,group],function(err,results){
 			if(err)
 			{
@@ -426,7 +450,7 @@ app.post('/modifyProduct', function(req,res){
 			{
 				res.json({'message':productName + ' was successfully updated'});	
 			}
-			});
+			}); });
 		}
 	 }
 	 else
@@ -487,6 +511,7 @@ app.post('/viewUsers', function(req,res){
     query+=where_clause;
 	console.log(query);
 	
+	poolWrite.getConnection(function(err,mc){
 	mc.query(query,function(err,rows){
 		
 			if(err)
@@ -508,7 +533,7 @@ app.post('/viewUsers', function(req,res){
 				}
 				
 			}
-			});
+	});});
     }
     else
 	{
@@ -571,7 +596,7 @@ app.post('/viewProducts', function(req,res){
 	
     query+=where_clause;
 	console.log(query);
-	
+	poolRead.getConnection(function(err,mc){
 	mc.query(query,function(err,rows){
 		
 		if(err)
@@ -604,14 +629,14 @@ app.post('/viewProducts', function(req,res){
 				}
 				
 			}
-			});
+	});});
 });
 
-app.post('/buyProducts', function(req,res){
+app.post('/buyProductsA', function(req,res){
 	
   if(req.session.username)
   {
-		var temp=true;
+		var temp=true, result_temp=true;
 		var inputproducts = req.body.products;
 		var requestsLength = inputproducts.length;
         var products=[];
@@ -620,26 +645,36 @@ app.post('/buyProducts', function(req,res){
 		{
 			products[i]= inputproducts[i].asin;
 		}
+		console.log(products);
+		
 		
 		for(var i=0;i<requestsLength;i++)
 		{
+			console.log("Checking asins");
 			var currentasin=products[i];
-			mc.query('select * from products where asin=?',[currentasin],function(err, rows){
+			mc.query('select asin from products where asin=?',[currentasin],function(err, rows){
+			console.log("Select query executed");
 		    if(rows.length<=0)
 		    {
-			   res.json({'message':'There are no products that match that criteria'});	   
+			   result_temp = false;
+			   // res.json({'message':'There are no products that match that criteria'});	   
 		    }
 		    });
 		}
+
 		// Update the items purchaed by the customer
 		for(var i=0;i<requestsLength;i++)
 		{
+			console.log("Update the productsPurchasedByCustomer table");
 			var currentasin=products[i];
+			console.log(req.session.username + " " + currentasin);
 			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentasin],function(err,results){
-		    if(err)
+		    console.log("Inside sql");
+			if(err)
 		    {
 			  console.log(err);
-			  res.json({'message':'There are no products that match that criteria'});
+			  result_temp = false;
+			  // res.json({'message':'There are no products that match that criteria'});
 			  //mc.end();
 		    }
 			});	
@@ -648,7 +683,8 @@ app.post('/buyProducts', function(req,res){
 		// Update for recommendation
 		for(var i=0;i<requestsLength-1;i++)
 		{
-		   	for(var j=i+1;j<requestsLength;j++)
+		   	
+			for(var j=i+1;j<requestsLength;j++)
 		    {     
 				for(var k=j-1;k>=0;k--)
 				{
@@ -660,50 +696,274 @@ app.post('/buyProducts', function(req,res){
 				}
 				if(temp)
 				{
-				    mc.query('insert into productsPurchasedTogether values (?,?)',[currentasin,nextasin],function(err,results){
+				    console.log("Update the productsPurchasedTogether table");
+					mc.query('insert into productsPurchasedTogether values (?,?)',[products[i],products[j]],function(err,results){
 		            if(err)
 		            {
 			         console.log(err);
+					 result_temp = false;
 			         //mc.end();
-			         res.json({'message':'There are no products that match that criteria'});
+			         //res.json({'message':'There are no products that match that criteria'});
 		            }
 		            });	
 					
-					mc.query('insert into productsPurchasedTogether values (?,?)',[nextasin,currentasin],function(err,results){
+					mc.query('insert into productsPurchasedTogether values (?,?)',[products[j],products[i]],function(err,results){
 		            if(err)
 		            {
 			         console.log(err);
+					 result_temp = false;
 			         //mc.end();
-			         res.json({'message':'There are no products that match that criteria'});
+			         // res.json({'message':'There are no products that match that criteria'});
 		            }
 		            });
 				}
 			}				  
 		}
-	  res.json({'message':'The action was successful'});	
+	  if(result_temp)
+	  {
+		res.json({'message':'The action was successful'});	  
+	  }
+	  else
+	  {
+		res.json({'message':'There are no products that match that criteria'});
+	  }
 	}
 	
   else
   {
 	  res.json({'message':'You are not currently logged in'});
   }
+  
+  console.log("End of buyProducts");
+});
+
+app.post('/buyProductsD', function(req,res){
+	
+  if(req.session.username)
+  {
+		var temp=true, result_temp=true;
+		var inputproducts = req.body.products;
+		var requestsLength = inputproducts.length;
+        var products=[];
+		var query= ' insert into productsPurchasedByCustomer (username, productName) values ';
+		var k=0; 
+		
+		for(var i=0;i<requestsLength;i++)
+		{
+			k++;
+			products[i]= inputproducts[i].asin;
+			if(k<requestsLength) query+= ' ( \'' + req.session.username + '\' , \'' + products[i] + '\' ) ' + ' , ';
+			else query+= ' ( \'' + req.session.username + '\' , \'' + products[i] + '\' ) ' ;
+		}
+		
+		    console.log(query);
+			console.log("Update the productsPurchasedByCustomer table");
+			mc.query(query,function(err,results){
+		    console.log("Inside productsPurchased query");
+			if(err)
+		    {
+			  console.log(err);
+			  result_temp = false;
+			  res.json({'message':'There are no products that match that criteria'});
+			  //mc.end();
+		    }
+			else
+			{
+				res.json({'message':'The action was successful'});
+			}
+			});	
+		
+		// Update for recommendation
+		for(var i=0;i<requestsLength-1;i++)
+		{
+		   	
+			for(var j=i+1;j<requestsLength;j++)
+		    {     
+				for(var k=j-1;k>=0;k--)
+				{
+					if(products[j]==products[k])
+					{
+						temp=false;
+						break;
+					}  
+				}
+				if(temp)
+				{
+				    console.log("Update the productsPurchasedTogether table");
+					mc.query('insert into productsPurchasedTogether values (?,?)',[products[i],products[j]],function(err,results){
+		            console.log("Inside recommendation query1");
+					if(err)
+		            {
+			         console.log(err);
+					 result_temp = false;
+			         //mc.end();
+			         //res.json({'message':'There are no products that match that criteria'});
+		            }
+		            });	
+					
+					mc.query('insert into productsPurchasedTogether values (?,?)',[products[j],products[i]],function(err,results){
+		            console.log("Inside recommendation query2");
+					if(err)
+		            {
+			         console.log(err);
+					 result_temp = false;
+			         //mc.end();
+			         // res.json({'message':'There are no products that match that criteria'});
+		            }
+		            });
+				}
+			}				  
+		}
+	}
+	
+  else
+  {
+	  res.json({'message':'You are not currently logged in'});
+  }
+  
+  console.log("End of buyProducts");
+});
+
+
+
+app.post('/buyProducts', function(req,res){
+	
+  if(req.session.username)
+  {
+	var parameters =req.body.products;
+	var values = "";
+	var temp = 0;
+	for(i=0;i<parameters.length;i++)
+	{
+	    if(temp)
+		{
+		  values+=',';
+	    }
+		values+=(parameters[i].asin);
+		temp++;
+	}
+	var paramset = [values,parameters.length];
+	poolRead.getConnection(function(err,mc){
+    mc.query("SELECT verifyAsins(?,?) as isValid" ,paramset, function (err, rows, fields) {
+		if (err)
+		{
+			throw err;
+		}
+		else
+		{
+				if(rows[0].isValid==0)
+				{
+					res.json({'message':'There are no products that match that criteria'});
+				}
+				else
+				{
+		var temp=true, result_temp=true;
+		var inputproducts = req.body.products;
+		var requestsLength = inputproducts.length;
+        var products=[];
+		
+		for(var i=0;i<requestsLength;i++)
+		{
+			products[i]= inputproducts[i].asin;
+		}
+		console.log(products);
+	
+		// Update the items purchaed by the customer
+		for(var i=0;i<requestsLength;i++)
+		{
+			console.log("Update the productsPurchasedByCustomer table");
+			var currentasin=products[i];
+			console.log(req.session.username + " " + currentasin);
+			poolRead.getConnection(function(err,mc){
+			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentasin],function(err,results){
+		    console.log("Inside sql");
+			if(err)
+		    {
+			  console.log(err);
+			  result_temp = false;
+		    }
+			});	});
+		}
+		
+		// Update for recommendation
+		for(var i=0;i<requestsLength-1;i++)
+		{
+		   	
+			for(var j=i+1;j<requestsLength;j++)
+		    {     
+				for(var k=j-1;k>=0;k--)
+				{
+					if(products[j]==products[k])
+					{
+						temp=false;
+						break;
+					}  
+				}
+				if(temp)
+				{
+				    console.log("Update the productsPurchasedTogether table");
+					poolWrite.getConnection(function(err,mc){
+					mc.query('insert into productsPurchasedTogether values (?,?)',[products[i],products[j]],function(err,results){
+		            if(err)
+		            {
+			         console.log(err);
+					 result_temp = false;
+		            }
+				});	});
+					
+					poolWrite.getConnection(function(err,mc){
+					mc.query('insert into productsPurchasedTogether values (?,?)',[products[j],products[i]],function(err,results){
+		            if(err)
+		            {
+			         console.log(err);
+					 result_temp = false;
+		            }
+		            });});
+				}
+			}				  
+		}	
+			res.json({'message':'The action was successful'});		
+	 }
+								
+	  }
+			
+	});});
+  }
+	
+  else
+  {
+	  res.json({'message':'You are not currently logged in'});
+  }
+  
+  console.log("End of buyProducts");
 });
 
 app.post('/productsPurchased', function(req,res){
-	
+  console.log("In productsPurchased");
   if(req.session.username)
   {
 	if(req.session.admin)
     {
+		console.log(req.body.username);
+		poolRead.getConnection(function(err,mc){
 		mc.query('select * from userdetails where username=?',[req.body.username],function(err, rows){
 		   
-		   if (err || rows.length<=0)
+		   if(err)
+		   {
+			   console.log(err);
+			   //mc.end();   
+			   throw err;
+		   }
+		   
+		   else if (rows.length<=0)
 		   {
 			   res.json({'message':'There are no users that match that criteria'});
 		   }
 		   
 		   else
 		   {
+			   console.log("Before query");
+			   poolRead.getConnection(function(err,mc){
 			   mc.query('select productName, count(productName) as quantity from productsPurchasedByCustomer where username=? group by productName ',[req.body.username],function(err, rows){
 		   
 		        if (err || rows.length<=0)
@@ -716,10 +976,10 @@ app.post('/productsPurchased', function(req,res){
 					res.json({'message':'The action was successful', 'products':rows});
 				}
 		   
-	          });
+			   });});
 		   }
 		   
-	   });
+		});});
 	}
 	else
 	{
@@ -730,6 +990,7 @@ app.post('/productsPurchased', function(req,res){
   {
 	  res.json({'message':'You are not currently logged in'});
   }
+  console.log("End of productsPurchased");
 });
 
 
@@ -744,13 +1005,14 @@ app.post('/getRecommendations', function(req,res){
 		   
 	else
 	{
+		poolRead.getConnection(function(err,mc){
 	     mc.query('select asin from ( select product2 as asin , count(*) as cnt from productsPurchasedTogether where product1=? group by product2 order by cnt desc limit 5  ) as temp',[asin],function(err, rows){
 			res.json({'message':'The action was successful', 'products':rows});
-		 });
+		});});
 	}
 		   
     });
-	
+	console.log("End of getRecommendations");
 });
 
 
