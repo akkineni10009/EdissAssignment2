@@ -85,6 +85,7 @@ app.post('/login', function(req,res){
 	
 	   console.log("Connection established");
 	   poolRead.getConnection(function(err,mc){
+	   if( err) throw err;
 	   mc.query('select * from userdetails where username=? and password=?',[username,password],function(err, rows){
 		   
 		   if(err)
@@ -150,6 +151,7 @@ app.post('/registerUser',function(req,res){
 		
 	
 	  poolRead.getConnection(function(err,mc){
+		   if( err) throw err;
 	  mc.query('select * from userdetails where username=?',[username],function(err,rows){
 		console.log("query executed");
 		if(err)
@@ -170,6 +172,7 @@ app.post('/registerUser',function(req,res){
 			//var sqlquery= "insert into userdetails values (?,?,?,?,?,?,?,?,?)",[fname,lname,address,city,state,zip,email,username,password];
 			//console.log(sqlquery);
 			poolRead.getConnection(function(err,mc){
+				 if( err) throw err;
 			mc.query('insert into userdetails values (?,?,?,?,?,?,?,?,?,?,?)',[fname,lname,address,city,state,zip,email,username,password,userId,role],function(err,results){
 				if(err)
 				{
@@ -320,6 +323,7 @@ app.post('/updateInfo',function(req,res){
 	else
 	{
 		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 		mc.query('select * from userdetails where username=?',[username],function(err,rows){
 			if(err)
 			{
@@ -336,6 +340,7 @@ app.post('/updateInfo',function(req,res){
 			{
 				console.log(query);	
 				poolRead.getConnection(function(err,mc){
+					 if( err) throw err;
 				mc.query(query,function(err,results){
 				if(err)
 				{
@@ -349,6 +354,7 @@ app.post('/updateInfo',function(req,res){
 					console.log(session_user);
 					req.session.username=username;
 					poolRead.getConnection(function(err,mc){
+						 if( err) throw err;
 					mc.query('select fname from userdetails where username=?',[username],function(err,rows){
 							
 						
@@ -391,7 +397,8 @@ app.post('/addProducts', function(req,res){
 	       var productDescription = req.body.productDescription;
 	       var group =  req.body.group;
 	       var username=req.body.asin;
-         poolRead.getConnection(function(err,mc){		 
+         poolRead.getConnection(function(err,mc){	
+		if( err) throw err;		 
 		 mc.query('select * from products where username = ?',[asin],function(err,results){
 		 
 		if(err)
@@ -408,6 +415,7 @@ app.post('/addProducts', function(req,res){
 		else
 		{
 			poolRead.getConnection(function(err,mc){
+				 if( err) throw err;
 			mc.query('insert into products values (?,?,?,?,?)',[username,asin,productName,productDescription,group],function(err,results){
 		
 			if(err)
@@ -460,6 +468,7 @@ app.post('/modifyProduct', function(req,res){
 			var group =  req.body.group;
 			var username=req.body.asin;
 			poolRead.getConnection(function(err,mc){
+				 if( err) throw err;
 			mc.query('update products set productName=?, productDescription=? where username=? and groups=? ',[productName,productDescription,asin,group],function(err,results){
 			if(err)
 			{
@@ -533,6 +542,7 @@ app.post('/viewUsers', function(req,res){
 	console.log(query);
 	
 	poolRead.getConnection(function(err,mc){
+		 if( err) throw err;
 	mc.query(query,function(err,rows){
 		
 			if(err)
@@ -577,12 +587,13 @@ var querystring;
 
 
 poolRead.getConnection(function(err,readconnection){
+	 if( err) throw err;
 if(typeof req.body.asin === 'undefined' && typeof req.body.group ==='undefined' && typeof req.body.keyword === 'undefined'){
     querystring = "SELECT asin, productName from products limit 1000;";
 }
 else{
 querystring = "SELECT asin, productName from products where";
-if(asin) { querystring+=" asin = "+ readconnection.escape(req.body.asin)+" or"; }  
+if(asin) { querystring+=" asin = "+ +" or"; }  
 if(grp) { querystring += " `groups` = "+ readconnection.escape(req.body.group)+ " or"; }
 if(key) { querystring+=  ' match(productName,productDescription) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
   
@@ -656,6 +667,7 @@ app.post('/viewProductsA', function(req,res){
     query+=where_clause;
 	console.log(query);
 	poolRead.getConnection(function(err,mc){
+		 if( err) throw err;
 	mc.query(query,function(err,rows){
 		
 		if(err)
@@ -688,6 +700,7 @@ app.post('/buyProducts', function(req,res){
 	var values = "";
 	var temp = 0;
 	poolRead.getConnection(function(err,mc){
+		 if( err) throw err;
 	for(i=0;i<parameters.length;i++)
 	{
 	    if(temp)
@@ -699,7 +712,7 @@ app.post('/buyProducts', function(req,res){
 	}
 	var paramset = [values,parameters.length];
 	
-    mc.query("SELECT verifyAsins(?,?) as isValid" ,paramset, function (err, rows, fields) {
+	mc.query("SELECT verifyAsins(?,?) as isValid" ,paramset, function (err, rows, fields) {
 		if (err)
 		{
 			//throw err;
@@ -726,13 +739,14 @@ app.post('/buyProducts', function(req,res){
 		// Update the items purchaed by the customer
 		var currentProductName;
 		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 		for(var i=0;i<requestsLength;i++)
 		{
 			console.log("Update the productsPurchasedByCustomer table");
 			var currentasin=products[i];
 			console.log(req.session.username + " " + currentasin);
 			
-			mc.query(' select productName from products where asin = ?',[currentasin],function(err,results){
+			mc.query('select productName from products where asin = ?',[currentasin],function(err,results){
 		    if(err)
 		    {
 			  
@@ -756,6 +770,7 @@ app.post('/buyProducts', function(req,res){
 		});
 		// Update for recommendation
 		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 		for(var i=0;i<requestsLength-1;i++)
 		{
 		   	
@@ -815,6 +830,7 @@ app.post('/productsPurchased', function(req,res){
     {
 		console.log(req.body.username);
 		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 		mc.query('select * from userdetails where username=?',[req.body.username],function(err, rows){
 		   
 		   if(err)
@@ -833,6 +849,7 @@ app.post('/productsPurchased', function(req,res){
 		   {
 			   console.log("Before query");
 			   poolRead.getConnection(function(err,mc){
+				    if( err) throw err;
 			   mc.query('select productName, count(productName) as quantity from productsPurchasedByCustomer where username=? group by productName ',[req.body.username],function(err, rows){
 		   
 		        if (err || rows.length<=0)
@@ -866,6 +883,7 @@ app.post('/productsPurchased', function(req,res){
 app.post('/getRecommendations', function(req,res){
 	var asin = req.body.asin;
 	poolRead.getConnection(function(err,mc){
+		 if( err) throw err;
 	mc.query('select * from productsPurchasedTogether where product1=?',[asin],function(err, rows){
 		   
 	if (err || rows.length<=0)
@@ -876,6 +894,7 @@ app.post('/getRecommendations', function(req,res){
 	else
 	{
 		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 	     mc.query('select asin from ( select product2 as asin , count(*) as cnt from productsPurchasedTogether where product1=? group by product2 order by cnt desc limit 5  ) as temp',[asin],function(err, rows){
 			res.json({'message':'The action was successful', 'products':rows});
 		});mc.release();});
