@@ -690,7 +690,7 @@ app.post('/viewProductsA', function(req,res){
 				}
 				
 			}
-	});});
+	});mc.release();});
 });
 
 app.post('/buyProducts', function(req,res){
