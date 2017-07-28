@@ -604,6 +604,7 @@ console.log("querystring"+querystring);
 
 var queries = readconnection.query(querystring, function(err, rows, fields) {
    // readconnection.release();
+   if(err) throw err;
    if (rows.length > 0 )
     {    
          res.json({'message':'The action was successful', 'product':rows});
