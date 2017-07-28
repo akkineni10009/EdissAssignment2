@@ -613,7 +613,7 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
 		  var temp_result=[];
           for(var i =0; i< rows.length; i++)
           {
-              temp_result[i]=rows.productName[i].split(',');
+              temp_result[i]=rows[i].productName.split(',');
 			  var temp= '{"asin":"'+rows[i].asin+'","productName":"'+temp_result[0]+'"}';
               results.push(temp);
           }
