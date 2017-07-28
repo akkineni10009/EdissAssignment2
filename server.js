@@ -680,200 +680,6 @@ app.post('/viewProductsA', function(req,res){
 	});});
 });
 
-app.post('/buyProductsA', function(req,res){
-	
-  if(req.session.username)
-  {
-		var temp=true, result_temp=true;
-		var inputproducts = req.body.products;
-		var requestsLength = inputproducts.length;
-        var products=[];
-		
-		for(var i=0;i<requestsLength;i++)
-		{
-			products[i]= inputproducts[i].asin;
-		}
-		console.log(products);
-		
-		
-		for(var i=0;i<requestsLength;i++)
-		{
-			console.log("Checking asins");
-			var currentasin=products[i];
-			mc.query('select asin from products where asin=?',[currentasin],function(err, rows){
-			console.log("Select query executed");
-		    if(rows.length<=0)
-		    {
-			   result_temp = false;
-			   // res.json({'message':'There are no products that match that criteria'});	   
-		    }
-		    });
-		}
-
-		// Update the items purchaed by the customer
-		for(var i=0;i<requestsLength;i++)
-		{
-			console.log("Update the productsPurchasedByCustomer table");
-			var currentasin=products[i];
-			console.log(req.session.username + " " + currentasin);
-			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentasin],function(err,results){
-		    console.log("Inside sql");
-			if(err)
-		    {
-			  console.log(err);
-			  result_temp = false;
-			  // res.json({'message':'There are no products that match that criteria'});
-			  //mc.end();
-		    }
-			});	
-		}
-		
-		// Update for recommendation
-		for(var i=0;i<requestsLength-1;i++)
-		{
-		   	
-			for(var j=i+1;j<requestsLength;j++)
-		    {     
-				for(var k=j-1;k>=0;k--)
-				{
-					if(products[j]==products[k])
-					{
-						temp=false;
-						break;
-					}  
-				}
-				if(temp)
-				{
-				    console.log("Update the productsPurchasedTogether table");
-					mc.query('insert into productsPurchasedTogether values (?,?)',[products[i],products[j]],function(err,results){
-		            if(err)
-		            {
-			         console.log(err);
-					 result_temp = false;
-			         //mc.end();
-			         //res.json({'message':'There are no products that match that criteria'});
-		            }
-		            });	
-					
-					mc.query('insert into productsPurchasedTogether values (?,?)',[products[j],products[i]],function(err,results){
-		            if(err)
-		            {
-			         console.log(err);
-					 result_temp = false;
-			         //mc.end();
-			         // res.json({'message':'There are no products that match that criteria'});
-		            }
-		            });
-				}
-			}				  
-		}
-	  if(result_temp)
-	  {
-		res.json({'message':'The action was successful'});	  
-	  }
-	  else
-	  {
-		res.json({'message':'There are no products that match that criteria'});
-	  }
-	}
-	
-  else
-  {
-	  res.json({'message':'You are not currently logged in'});
-  }
-  
-  console.log("End of buyProducts");
-});
-
-app.post('/buyProductsD', function(req,res){
-	
-  if(req.session.username)
-  {
-		var temp=true, result_temp=true;
-		var inputproducts = req.body.products;
-		var requestsLength = inputproducts.length;
-        var products=[];
-		var query= ' insert into productsPurchasedByCustomer (username, productName) values ';
-		var k=0; 
-		
-		for(var i=0;i<requestsLength;i++)
-		{
-			k++;
-			products[i]= inputproducts[i].asin;
-			if(k<requestsLength) query+= ' ( \'' + req.session.username + '\' , \'' + products[i] + '\' ) ' + ' , ';
-			else query+= ' ( \'' + req.session.username + '\' , \'' + products[i] + '\' ) ' ;
-		}
-		
-		    console.log(query);
-			console.log("Update the productsPurchasedByCustomer table");
-			mc.query(query,function(err,results){
-		    console.log("Inside productsPurchased query");
-			if(err)
-		    {
-			  console.log(err);
-			  result_temp = false;
-			  res.json({'message':'There are no products that match that criteria'});
-			  //mc.end();
-		    }
-			else
-			{
-				res.json({'message':'The action was successful'});
-			}
-			});	
-		
-		// Update for recommendation
-		for(var i=0;i<requestsLength-1;i++)
-		{
-		   	
-			for(var j=i+1;j<requestsLength;j++)
-		    {     
-				for(var k=j-1;k>=0;k--)
-				{
-					if(products[j]==products[k])
-					{
-						temp=false;
-						break;
-					}  
-				}
-				if(temp)
-				{
-				    console.log("Update the productsPurchasedTogether table");
-					mc.query('insert into productsPurchasedTogether values (?,?)',[products[i],products[j]],function(err,results){
-		            console.log("Inside recommendation query1");
-					if(err)
-		            {
-			         console.log(err);
-					 result_temp = false;
-			         //mc.end();
-			         //res.json({'message':'There are no products that match that criteria'});
-		            }
-		            });	
-					
-					mc.query('insert into productsPurchasedTogether values (?,?)',[products[j],products[i]],function(err,results){
-		            console.log("Inside recommendation query2");
-					if(err)
-		            {
-			         console.log(err);
-					 result_temp = false;
-			         //mc.end();
-			         // res.json({'message':'There are no products that match that criteria'});
-		            }
-		            });
-				}
-			}				  
-		}
-	}
-	
-  else
-  {
-	  res.json({'message':'You are not currently logged in'});
-  }
-  
-  console.log("End of buyProducts");
-});
-
-
-
 app.post('/buyProducts', function(req,res){
 	
   if(req.session.username)
@@ -917,6 +723,7 @@ app.post('/buyProducts', function(req,res){
 		console.log(products);
 	
 		// Update the items purchaed by the customer
+		var currentProductName;
 		poolRead.getConnection(function(err,mc){
 		for(var i=0;i<requestsLength;i++)
 		{
@@ -924,9 +731,20 @@ app.post('/buyProducts', function(req,res){
 			var currentasin=products[i];
 			console.log(req.session.username + " " + currentasin);
 			
-			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentasin],function(err,results){
-		    console.log("Inside sql");
-			if(err)
+			mc.query(' select productName from products where asin = ?',[currentasin],function(err,results){
+		    if(err)
+		    {
+			  
+		    }
+			else
+			{
+				currentProductName=results[0].productName;
+			}
+			
+			});	
+			
+			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentProductName],function(err,results){
+		    if(err)
 		    {
 			  console.log(err);
 			  result_temp = false;
