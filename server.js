@@ -739,17 +739,18 @@ app.post('/buyProducts', function(req,res){
 			else
 			{
 				currentProductName=results[0].productName;
+				mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentProductName],function(err,results){
+				if(err)
+				{
+					console.log(err);
+					result_temp = false;
+				}
+				});	
 			}
 			
 			});	
 			
-			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentProductName],function(err,results){
-		    if(err)
-		    {
-			  console.log(err);
-			  result_temp = false;
-		    }
-			});	
+			
 		}
 		});
 		// Update for recommendation
