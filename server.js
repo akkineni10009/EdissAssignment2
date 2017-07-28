@@ -45,7 +45,7 @@ app.use(bodyParser.urlencoded({
     port     : '3306',
     debug    :  false
 });
-var poolWrite = mysql.createPool({
+/*var poolRead = mysql.createPool({
     connectionLimit : 600, 
 	host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
     user: 'akkineni10009',
@@ -53,7 +53,7 @@ var poolWrite = mysql.createPool({
     database: 'Ediss',
     port     : '3306',
     debug    :  false
-});
+});*/
  
  /*var poolRead = mysql.createPool({
     connectionLimit : 600, 
@@ -64,7 +64,7 @@ var poolWrite = mysql.createPool({
     port     : '3306',
     debug    :  false
 });
-var poolWrite = mysql.createPool({
+var poolRead = mysql.createPool({
     connectionLimit : 600, 
 	host: '127.0.0.1',
     user: 'root',
@@ -108,7 +108,7 @@ app.post('/login', function(req,res){
 			   res.json({'message':'There seems to be an issue with the username/password combination that you entered'});
 		   }
 		   
-	   }); });
+	   });mc.release(); });
 });
 
 app.post('/logout',function(req,res){
@@ -169,7 +169,7 @@ app.post('/registerUser',function(req,res){
 		{
 			//var sqlquery= "insert into userdetails values (?,?,?,?,?,?,?,?,?)",[fname,lname,address,city,state,zip,email,username,password];
 			//console.log(sqlquery);
-			poolWrite.getConnection(function(err,mc){
+			poolRead.getConnection(function(err,mc){
 			mc.query('insert into userdetails values (?,?,?,?,?,?,?,?,?,?,?)',[fname,lname,address,city,state,zip,email,username,password,userId,role],function(err,results){
 				if(err)
 				{
@@ -335,7 +335,7 @@ app.post('/updateInfo',function(req,res){
 			else
 			{
 				console.log(query);	
-				poolWrite.getConnection(function(err,mc){
+				poolRead.getConnection(function(err,mc){
 				mc.query(query,function(err,results){
 				if(err)
 				{
@@ -391,7 +391,7 @@ app.post('/addProducts', function(req,res){
 	       var productDescription = req.body.productDescription;
 	       var group =  req.body.group;
 	       var username=req.body.asin;
-         poolWrite.getConnection(function(err,mc){		 
+         poolRead.getConnection(function(err,mc){		 
 		 mc.query('select * from products where username = ?',[asin],function(err,results){
 		 
 		if(err)
@@ -407,7 +407,7 @@ app.post('/addProducts', function(req,res){
 		
 		else
 		{
-			poolWrite.getConnection(function(err,mc){
+			poolRead.getConnection(function(err,mc){
 			mc.query('insert into products values (?,?,?,?,?)',[username,asin,productName,productDescription,group],function(err,results){
 		
 			if(err)
@@ -459,7 +459,7 @@ app.post('/modifyProduct', function(req,res){
 			var productDescription = req.body.productDescription;
 			var group =  req.body.group;
 			var username=req.body.asin;
-			poolWrite.getConnection(function(err,mc){
+			poolRead.getConnection(function(err,mc){
 			mc.query('update products set productName=?, productDescription=? where username=? and groups=? ',[productName,productDescription,asin,group],function(err,results){
 			if(err)
 			{
@@ -532,7 +532,7 @@ app.post('/viewUsers', function(req,res){
     query+=where_clause;
 	console.log(query);
 	
-	poolWrite.getConnection(function(err,mc){
+	poolRead.getConnection(function(err,mc){
 	mc.query(query,function(err,rows){
 		
 			if(err)
@@ -576,7 +576,7 @@ var grp = req.body.group;
 var querystring;
 
 
-poolWrite.getConnection(function(err,readconnection){
+poolRead.getConnection(function(err,readconnection){
 if(typeof req.body.asin === 'undefined' && typeof req.body.group ==='undefined' && typeof req.body.keyword === 'undefined'){
     querystring = "SELECT asin, productName from products limit 1000;";
 }
@@ -950,7 +950,7 @@ app.post('/buyProducts', function(req,res){
 				if(temp)
 				{
 				    console.log("Update the productsPurchasedTogether table");
-					poolWrite.getConnection(function(err,mc){
+					poolRead.getConnection(function(err,mc){
 					mc.query('insert into productsPurchasedTogether values (?,?)',[products[i],products[j]],function(err,results){
 		            if(err)
 		            {
@@ -959,7 +959,7 @@ app.post('/buyProducts', function(req,res){
 		            }
 				});	});
 					
-					poolWrite.getConnection(function(err,mc){
+					poolRead.getConnection(function(err,mc){
 					mc.query('insert into productsPurchasedTogether values (?,?)',[products[j],products[i]],function(err,results){
 		            if(err)
 		            {
