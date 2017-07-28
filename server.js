@@ -22,12 +22,12 @@ app.use(bodyParser.urlencoded({
 }));
  
 // connection configurations
-var mc = mysql.createConnection({
+/*var mc = mysql.createConnection({
     host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
     user: 'akkineni10009',
     password: 'Pedapadu1',
     database: 'Ediss'
-});
+});*/
 
 /*var mc = mysql.createConnection({
     host: '127.0.0.1',
@@ -36,15 +36,15 @@ var mc = mysql.createConnection({
     database: 'ediss'
 })*/
 
-/* var poolRead = mysql.createPool({
-    connectionLimit :2000, 
+ var poolRead = mysql.createPool({
+    connectionLimit :3000, 
     host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
     user: 'akkineni10009',
     password: 'Pedapadu1',
     database: 'Ediss',
     port     : '3306',
     debug    :  false
-}); */
+});
 /*var poolRead = mysql.createPool({
     connectionLimit : 600, 
 	host: 'mysql-instance.cc9eehfqupez.us-east-1.rds.amazonaws.com',
@@ -77,13 +77,15 @@ var poolRead = mysql.createPool({
  
 // connect to database
 console.log("Connection established");
-mc.connect();
+//mc.connect();
  
 app.post('/login', function(req,res){
 	var username = req.body.username;
 	var password = req.body.password;
 	
 	   console.log("Connection established");
+	   poolRead.getConnection(function(err,mc){
+	   if( err) throw err;
 	   mc.query('select * from userdetails where username=? and password=?',[username,password],function(err, rows){
 		   
 		   if(err)
@@ -107,7 +109,7 @@ app.post('/login', function(req,res){
 			   res.json({'message':'There seems to be an issue with the username/password combination that you entered'});
 		   }
 		   
-	   });
+	   });mc.release(); });
 });
 
 app.post('/logout',function(req,res){
@@ -148,6 +150,8 @@ app.post('/registerUser',function(req,res){
 	if(!role) role='user';
 		
 	
+	  poolRead.getConnection(function(err,mc){
+		   if( err) throw err;
 	  mc.query('select * from userdetails where username=?',[username],function(err,rows){
 		console.log("query executed");
 		if(err)
@@ -167,6 +171,8 @@ app.post('/registerUser',function(req,res){
 		{
 			//var sqlquery= "insert into userdetails values (?,?,?,?,?,?,?,?,?)",[fname,lname,address,city,state,zip,email,username,password];
 			//console.log(sqlquery);
+			poolRead.getConnection(function(err,mc){
+				 if( err) throw err;
 			mc.query('insert into userdetails values (?,?,?,?,?,?,?,?,?,?,?)',[fname,lname,address,city,state,zip,email,username,password,userId,role],function(err,results){
 				if(err)
 				{
@@ -176,10 +182,10 @@ app.post('/registerUser',function(req,res){
 				{
 					res.json({'message':fname + ' was registered successfully'});	
 				}
-			});
+			});mc.release();});		
 		}
 	
-	});
+	});mc.release(); }); 
 	}
 });
 
@@ -580,21 +586,23 @@ var grp = req.body.group;
 var querystring;
 
 
+poolRead.getConnection(function(err,readconnection){
+	 if( err) throw err;
 if(typeof req.body.asin === 'undefined' && typeof req.body.group ==='undefined' && typeof req.body.keyword === 'undefined'){
     querystring = "SELECT asin, productName from products limit 1000;";
 }
 else{
 querystring = "SELECT asin, productName from products where";
-if(asin) { querystring+=" asin = "+ req.body.asin+" or"; }  
-if(grp) { querystring += " `groups` = "+ req.body.group+ " or"; }
-if(key) { querystring+=  ' match(productName,productDescription) against ('+ req.body.keyword +' IN NATURAL LANGUAGE MODE) or'; }
+if(asin) { querystring+=" asin = "+ readconnection.escape(req.body.asin)+" or"; }  
+if(grp) { querystring += " `groups` = "+ readconnection.escape(req.body.group)+ " or"; }
+if(key) { querystring+=  ' match(productName,productDescription) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
   
 querystring = querystring.slice(0,-2);
 querystring += 'limit 1000;';
 }
 console.log("querystring"+querystring);
 
-var queries = mc.query(querystring, function(err, rows, fields) {
+var queries = readconnection.query(querystring, function(err, rows, fields) {
    // readconnection.release();
    if(err) throw err;
    if (rows.length > 0 )
@@ -606,7 +614,8 @@ var queries = mc.query(querystring, function(err, rows, fields) {
     {           
       res.json({'message':'There are no users that match that criteria'});    
     } 
- });
+ });readconnection.release();
+}); 
 });
 
 
@@ -691,6 +700,8 @@ app.post('/buyProducts', function(req,res){
 	var parameters =req.body.products;
 	var values = "";
 	var temp = 0;
+	poolRead.getConnection(function(err,mc){
+		 if( err) throw err;
 	for(i=0;i<parameters.length;i++)
 	{
 	    if(temp)
@@ -728,6 +739,8 @@ app.post('/buyProducts', function(req,res){
 	
 		// Update the items purchaed by the customer
 		var currentProductName;
+		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 		for(var i=0;i<requestsLength;i++)
 		{
 			console.log("Update the productsPurchasedByCustomer table");
@@ -754,8 +767,11 @@ app.post('/buyProducts', function(req,res){
 			});	
 			
 			
-		} 
+		} mc.release();
+		});
 		// Update for recommendation
+		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 		for(var i=0;i<requestsLength-1;i++)
 		{
 		   	
@@ -790,13 +806,13 @@ app.post('/buyProducts', function(req,res){
 		            });
 				}
 			}				  
-				}
+				}mc.release();	}); 
 			res.json({'message':'The action was successful'});		
 	 }
 								
 	  }
 			
-	});
+	});mc.release();});
   }
 	
   else
@@ -814,6 +830,8 @@ app.post('/productsPurchased', function(req,res){
 	if(req.session.admin)
     {
 		console.log(req.body.username);
+		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
 		mc.query('select * from userdetails where username=?',[req.body.username],function(err, rows){
 		   
 		   if(err)
@@ -831,6 +849,8 @@ app.post('/productsPurchased', function(req,res){
 		   else
 		   {
 			   console.log("Before query");
+			   poolRead.getConnection(function(err,mc){
+				    if( err) throw err;
 			   mc.query('select productName, count(productName) as quantity from productsPurchasedByCustomer where username=? group by productName ',[req.body.username],function(err, rows){
 		   
 		        if (err || rows.length<=0)
@@ -843,10 +863,10 @@ app.post('/productsPurchased', function(req,res){
 					res.json({'message':'The action was successful', 'products':rows});
 				}
 		   
-			   });
+			   });mc.release();});
 		   }
 		   
-		});
+		});mc.release();});
 	}
 	else
 	{
@@ -863,6 +883,8 @@ app.post('/productsPurchased', function(req,res){
 
 app.post('/getRecommendations', function(req,res){
 	var asin = req.body.asin;
+	poolRead.getConnection(function(err,mc){
+		 if( err) throw err;
 	mc.query('select * from productsPurchasedTogether where product1=?',[asin],function(err, rows){
 		   
 	if (err || rows.length<=0)
@@ -872,12 +894,14 @@ app.post('/getRecommendations', function(req,res){
 		   
 	else
 	{
-		 mc.query('select asin from ( select product2 as asin , count(*) as cnt from productsPurchasedTogether where product1=? group by product2 order by cnt desc limit 5  ) as temp',[asin],function(err, rows){
+		poolRead.getConnection(function(err,mc){
+			 if( err) throw err;
+	     mc.query('select asin from ( select product2 as asin , count(*) as cnt from productsPurchasedTogether where product1=? group by product2 order by cnt desc limit 5  ) as temp',[asin],function(err, rows){
 			res.json({'message':'The action was successful', 'products':rows});
-		});
+		});mc.release();});
 	}
 		   
-    });
+    });mc.release();});
 	console.log("End of getRecommendations");
 });
 
