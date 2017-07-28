@@ -607,7 +607,20 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
    if(err) throw err;
    if (rows.length > 0 )
     {    
-         res.json({'message':'The action was successful', 'product':rows});
+         //res.json({'message':'The action was successful', 'product':rows});
+		  var obj= '{"message":"The action was successful","product":[';    
+          var results = [];
+		  var temp_result=[];
+          for(var i =0; i< rows.length; i++)
+          {
+              temp_result=rows.productName.split(',');
+			  var temp= '{"asin":"'+rows[i].asin+'","productName":"'+temp_result[0]+'"}';
+              results.push(temp);
+          }
+          obj=obj+results+']}';
+          res.setHeader('Content-Type', 'application/json');
+          return res.send(obj);
+
     }            
 
    else          
