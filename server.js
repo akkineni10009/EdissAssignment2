@@ -179,10 +179,10 @@ app.post('/registerUser',function(req,res){
 				{
 					res.json({'message':fname + ' was registered successfully'});	
 				}
-			});	});		
+			});mc.release();});		
 		}
 	
-	}); });
+	});mc.release(); });
 	}
 });
 
@@ -354,13 +354,13 @@ app.post('/updateInfo',function(req,res){
 						
 						res.json({'message':rows[0].fname + ' your information was successfully updated'});	
 							
-					}); });
+					});mc.release(); });
 					
 				}
 				
-			}); });	
+			}); mc.release();});	
 			}
-	}); });
+	});mc.release(); });
 			
 	}
   }
@@ -420,9 +420,9 @@ app.post('/addProducts', function(req,res){
 			{
 				res.json({'message':productName + ' was successfully added to the system'});	
 			}
-			});});
+			});mc.release();});
 		}
-		 });});
+		 });mc.release();});
 		  
     }
 	
@@ -471,7 +471,7 @@ app.post('/modifyProduct', function(req,res){
 			{
 				res.json({'message':productName + ' was successfully updated'});	
 			}
-			}); });
+			});mc.release(); });
 		}
 	 }
 	 else
@@ -554,7 +554,7 @@ app.post('/viewUsers', function(req,res){
 				}
 				
 			}
-	});});
+	});mc.release();});
     }
     else
 	{
@@ -602,7 +602,7 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
     {           
       res.json({'message':'There are no users that match that criteria'});    
     } 
- });
+ });mc.release();
 }); 
 });
 
@@ -752,7 +752,7 @@ app.post('/buyProducts', function(req,res){
 			
 			
 		}
-		});
+		}); mc.release();
 		// Update for recommendation
 		poolRead.getConnection(function(err,mc){
 		for(var i=0;i<requestsLength-1;i++)
@@ -789,13 +789,13 @@ app.post('/buyProducts', function(req,res){
 		            });
 				}
 			}				  
-				}	});
+				}	}); mc.release();
 			res.json({'message':'The action was successful'});		
 	 }
 								
 	  }
 			
-	});});
+	});mc.release();});
   }
 	
   else
@@ -844,10 +844,10 @@ app.post('/productsPurchased', function(req,res){
 					res.json({'message':'The action was successful', 'products':rows});
 				}
 		   
-			   });});
+			   });mc.release();});
 		   }
 		   
-		});});
+		});mc.release();});
 	}
 	else
 	{
@@ -877,10 +877,10 @@ app.post('/getRecommendations', function(req,res){
 		poolRead.getConnection(function(err,mc){
 	     mc.query('select asin from ( select product2 as asin , count(*) as cnt from productsPurchasedTogether where product1=? group by product2 order by cnt desc limit 5  ) as temp',[asin],function(err, rows){
 			res.json({'message':'The action was successful', 'products':rows});
-		});});
+		});mc.release();});
 	}
 		   
-    });});
+    });mc.release();});
 	console.log("End of getRecommendations");
 });
 
