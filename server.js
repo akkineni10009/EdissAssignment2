@@ -3,16 +3,16 @@ var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var session = require('express-session');
-var redis = require("redis");
-var redisStore = require('connect-redis')(session);
-var client = redis.createClient(6379,'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', {no_ready_check: true});
+//var redis = require("redis");
+//var redisStore = require('connect-redis')(session);
+//var client = redis.createClient(6379,'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', {no_ready_check: true});
 
 app.use(session({
     secret: 'Ajay',
     cookie:{maxAge: 15*60*1000}, 
 	resave: true,
 	rolling:true,
-	store: new redisStore({ host: 'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', port:6379, client:client,ttl:260}),
+	//store: new redisStore({ host: 'mycachecluster.23kglk.0001.use1.cache.amazonaws.com', port:6379, client:client,ttl:260}),
 	saveUninitialized:true
 }))
 
@@ -917,12 +917,13 @@ app.post('/buyProducts', function(req,res){
 		console.log(products);
 	
 		// Update the items purchaed by the customer
+		poolRead.getConnection(function(err,mc){
 		for(var i=0;i<requestsLength;i++)
 		{
 			console.log("Update the productsPurchasedByCustomer table");
 			var currentasin=products[i];
 			console.log(req.session.username + " " + currentasin);
-			poolRead.getConnection(function(err,mc){
+			
 			mc.query('insert into productsPurchasedByCustomer values (?,?)',[req.session.username,currentasin],function(err,results){
 		    console.log("Inside sql");
 			if(err)
@@ -930,10 +931,11 @@ app.post('/buyProducts', function(req,res){
 			  console.log(err);
 			  result_temp = false;
 		    }
-			});	});
+			});	
 		}
-		
+		});
 		// Update for recommendation
+		poolRead.getConnection(function(err,mc){
 		for(var i=0;i<requestsLength-1;i++)
 		{
 		   	
@@ -950,26 +952,25 @@ app.post('/buyProducts', function(req,res){
 				if(temp)
 				{
 				    console.log("Update the productsPurchasedTogether table");
-					poolRead.getConnection(function(err,mc){
+					
 					mc.query('insert into productsPurchasedTogether values (?,?)',[products[i],products[j]],function(err,results){
 		            if(err)
 		            {
 			         console.log(err);
 					 result_temp = false;
 		            }
-				});	});
+				});	
 					
-					poolRead.getConnection(function(err,mc){
 					mc.query('insert into productsPurchasedTogether values (?,?)',[products[j],products[i]],function(err,results){
 		            if(err)
 		            {
 			         console.log(err);
 					 result_temp = false;
 		            }
-		            });});
+		            });
 				}
 			}				  
-		}	
+				}	});
 			res.json({'message':'The action was successful'});		
 	 }
 								
@@ -1044,6 +1045,7 @@ app.post('/productsPurchased', function(req,res){
 
 app.post('/getRecommendations', function(req,res){
 	var asin = req.body.asin;
+	poolRead.getConnection(function(err,mc){
 	mc.query('select * from productsPurchasedTogether where product1=?',[asin],function(err, rows){
 		   
 	if (err || rows.length<=0)
@@ -1059,7 +1061,7 @@ app.post('/getRecommendations', function(req,res){
 		});});
 	}
 		   
-    });
+    });});
 	console.log("End of getRecommendations");
 });
 
