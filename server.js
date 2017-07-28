@@ -602,7 +602,7 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
     {           
       res.json({'message':'There are no users that match that criteria'});    
     } 
- });mc.release();
+ });readconnection.release();
 }); 
 });
 
