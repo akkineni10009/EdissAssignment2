@@ -752,7 +752,7 @@ app.post('/buyProducts', function(req,res){
 			
 			
 		}
-		}); mc.release();
+		});
 		// Update for recommendation
 		poolRead.getConnection(function(err,mc){
 		for(var i=0;i<requestsLength-1;i++)
