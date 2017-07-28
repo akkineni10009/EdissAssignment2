@@ -687,6 +687,7 @@ app.post('/buyProducts', function(req,res){
 	var parameters =req.body.products;
 	var values = "";
 	var temp = 0;
+	poolRead.getConnection(function(err,mc){
 	for(i=0;i<parameters.length;i++)
 	{
 	    if(temp)
@@ -697,7 +698,7 @@ app.post('/buyProducts', function(req,res){
 		temp++;
 	}
 	var paramset = [values,parameters.length];
-	poolRead.getConnection(function(err,mc){
+	
     mc.query("SELECT verifyAsins(?,?) as isValid" ,paramset, function (err, rows, fields) {
 		if (err)
 		{
