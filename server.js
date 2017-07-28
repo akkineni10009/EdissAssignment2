@@ -185,7 +185,7 @@ app.post('/registerUser',function(req,res){
 			});mc.release();});		
 		}
 	
-	});mc.release(); });
+	});mc.release(); }); 
 	}
 });
 
@@ -767,7 +767,7 @@ app.post('/buyProducts', function(req,res){
 			});	
 			
 			
-		}
+		} mc.release();
 		});
 		// Update for recommendation
 		poolRead.getConnection(function(err,mc){
@@ -806,7 +806,7 @@ app.post('/buyProducts', function(req,res){
 		            });
 				}
 			}				  
-				}	}); mc.release();
+				}mc.release();	}); 
 			res.json({'message':'The action was successful'});		
 	 }
 								
