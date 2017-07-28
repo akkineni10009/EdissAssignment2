@@ -595,7 +595,7 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
    // readconnection.release();
    if (rows.length > 0 )
     {    
-         res.json({'message':'The action was successful', 'products':rows});
+         res.json({'message':'The action was successful', 'product':rows});
     }            
 
    else          
