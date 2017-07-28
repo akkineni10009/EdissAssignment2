@@ -593,7 +593,7 @@ if(typeof req.body.asin === 'undefined' && typeof req.body.group ==='undefined' 
 }
 else{
 querystring = "SELECT asin, productName from products where";
-if(asin) { querystring+=" asin = "+ +" or"; }  
+if(asin) { querystring+=" asin = "+ readconnection.escape(req.body.asin)+" or"; }  
 if(grp) { querystring += " `groups` = "+ readconnection.escape(req.body.group)+ " or"; }
 if(key) { querystring+=  ' match(productName,productDescription) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
   
