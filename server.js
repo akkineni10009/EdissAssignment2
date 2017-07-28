@@ -91,7 +91,7 @@ app.post('/login', function(req,res){
 		   {
 			   console.log(err);
 			   //mc.end();   
-			   throw err;
+			   //throw err;
 		   }
 		   
 		   else if (!err && rows.length>0)
@@ -157,7 +157,7 @@ app.post('/registerUser',function(req,res){
 			//mc.end();
 			console.log("in err");
 			console.log(err);
-			throw err;
+			//throw err;
 		}
 		
 		else if(rows.length>=1)
@@ -701,7 +701,7 @@ app.post('/buyProducts', function(req,res){
     mc.query("SELECT verifyAsins(?,?) as isValid" ,paramset, function (err, rows, fields) {
 		if (err)
 		{
-			throw err;
+			//throw err;
 		}
 		else
 		{
@@ -820,7 +820,7 @@ app.post('/productsPurchased', function(req,res){
 		   {
 			   console.log(err);
 			   //mc.end();   
-			   throw err;
+			   //throw err;
 		   }
 		   
 		   else if (rows.length<=0)
