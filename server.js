@@ -589,16 +589,27 @@ var querystring;
 poolRead.getConnection(function(err,readconnection){
 	 if( err) throw err;
 if(typeof req.body.asin === 'undefined' && typeof req.body.group ==='undefined' && typeof req.body.keyword === 'undefined'){
-    querystring = "SELECT asin, productName from products limit 1000;";
+    querystring = "SELECT asin, productName from products limit 10;";
 }
 else{
 querystring = "SELECT asin, productName from products where";
 if(asin) { querystring+=" asin = "+ readconnection.escape(req.body.asin)+" or"; }  
 if(grp) { querystring += " `groups` = "+ readconnection.escape(req.body.group)+ " or"; }
-if(key) { querystring+=  ' match(productName,productDescription) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
+
+if(key) { 
+        var word = req.body.keyword;
+    var numberOfWords = req.body.keyword.split(" ");
+    if(numberOfWords.length > 1){
+      //console.log(word);
+        if(word.charAt(0) !== '\"'){
+        req.body.keyword = "\"" + req.body.keyword + "\"";
+      }
+    }
+   
+  querystring+=  ' match(productName) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
   
 querystring = querystring.slice(0,-2);
-querystring += 'limit 1000;';
+querystring += 'limit 10;';
 }
 console.log("querystring"+querystring);
 
