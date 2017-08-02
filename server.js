@@ -613,7 +613,6 @@ querystring += 'limit 10;';
 console.log("querystring"+querystring);
 
 var queries = readconnection.query(querystring, function(err, rows, fields) {
-   readconnection.release();
    if (!err && rows.length > 0 )
     {    
           var obj= '{"message":"The action was successful","product":[';    
