@@ -578,7 +578,72 @@ app.post('/viewUsers', function(req,res){
    }
 });
 
+
 app.post( '/viewProducts',  function(req, res, next) { 
+var params =[req.body.asin,req.body.keyword,req.body.group];
+var pin= req.body.asin;
+var key= req.body.keyword;
+var grp = req.body.group;
+var querystring;
+
+
+poolRead.getConnection(function(err,readconnection){
+if(typeof req.body.asin === 'undefined' && typeof req.body.group ==='undefined' && typeof req.body.keyword === 'undefined'){
+    querystring = "SELECT asin, productName from products limit 10;";
+}
+else{
+querystring = "SELECT asin, productName from products where";
+if(pin) { querystring+=" asin = "+ readconnection.escape(req.body.asin)+" or"; }  
+if(grp) { querystring += ' match(`groups`) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
+if(key) { 
+        var word = req.body.keyword;
+    var numberOfWords = req.body.keyword.split(" ");
+    if(numberOfWords.length > 1){
+      //console.log(word);
+        if(word.charAt(0) !== '\"'){
+        req.body.keyword = "\"" + req.body.keyword + "\"";
+      }
+    }
+   
+  querystring+=  ' match(productName) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
+  
+querystring = querystring.slice(0,-2);
+querystring += 'limit 10;';
+}
+console.log("querystring"+querystring);
+
+var queries = readconnection.query(querystring, function(err, rows, fields) {
+   readconnection.release();
+   if (!err && rows.length > 0 )
+    {    
+          var obj= '{"message":"The action was successful","product":[';    
+          var results = [];
+          var prod = [];
+          for(var i =0; i< rows.length; i++)
+          {
+              prod=  rows[i].productName.split(',');
+              var temp= '{"asin":"'+rows[i].asin+'","productName":"'+prod[0]+'"}';
+              results.push(temp);
+          }
+          obj=obj+results+']}';
+          res.setHeader('Content-Type', 'application/json');
+          return res.send(obj);
+    }            
+
+   else          
+    {           
+      var obj= '{"message":"There are no products that match that criteria"}';
+      res.setHeader('Content-Type', 'application/json');
+      return res.send(obj);     
+          
+    } 
+ });
+ readconnection.release();
+}); 
+ (req,res,next);
+});
+
+/*app.post( '/viewProducts',  function(req, res, next) { 
 var params =[req.body.asin,req.body.keyword,req.body.group];
 var asin= req.body.asin;
 var key= req.body.keyword;
@@ -643,7 +708,7 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
 });
 
 
-app.post('/viewProductsA', function(req,res){
+*/app.post('/viewProductsA', function(req,res){
 	var asin=req.body.asin;
 	var keyword=req.body.keyword;
 	var group=req.body.group;
