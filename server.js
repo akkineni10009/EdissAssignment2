@@ -605,7 +605,7 @@ if(key) {
       }
     }
    
-  querystring+=  ' match(productName) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
+  querystring+=  ' match(productName) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) and productName='+ readconnection.escape(req.body.keyword) +' or'; }
   
 querystring = querystring.slice(0,-2);
 querystring += 'limit 10;';
