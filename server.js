@@ -617,11 +617,11 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
     {    
           var obj= '{"message":"The action was successful","product":[';    
           var results = [];
-          var prod = [];
+          //var prod = [];
           for(var i =0; i< rows.length; i++)
           {
-              prod=  rows[i].productName.split(',');
-              var temp= '{"asin":"'+rows[i].asin+'","productName":"'+prod[0]+'"}';
+              //prod=  rows[i].productName.split(',');
+              var temp= '{"asin":"'+rows[i].asin+'","productName":"'+rows[i].productName+'"}';
               results.push(temp);
           }
           obj=obj+results+']}';
