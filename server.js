@@ -583,89 +583,6 @@ var params =[req.body.asin,req.body.keyword,req.body.group];
 var pin= req.body.asin;
 var key= req.body.keyword;
 var grp = req.body.group;
-var querystring,prodstring;
-
-
-poolRead.getConnection(function(err,readconnection){
-if(typeof req.body.asin === 'undefined' && typeof req.body.group ==='undefined' && typeof req.body.keyword === 'undefined'){
-    querystring = "SELECT asin, productName from products limit 10;";
-}
-else{
-querystring = "SELECT asin, productName from products where";
-if(pin) { querystring+=" asin = "+ readconnection.escape(req.body.asin)+" or"; }  
-if(grp) { querystring += ' match(`groups`) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) or'; }
-if(key) { 
-  var tmp=req.body.keyword+'%';
- prodstring= querystring +  ' match(productName) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) AND productName like ' +readconnection.escape(tmp)+' or'; 
-  querystring+=  ' match(productName) against ('+ readconnection.escape(req.body.keyword) +' IN NATURAL LANGUAGE MODE) AND productName='+readconnection.escape(req.body.keyword) +' or'; }
-  
-querystring = querystring.slice(0,-2);
-querystring += 'limit 10;';
-}
-console.log("querystring"+querystring);
-
-var queries = readconnection.query(querystring, function(err, rows, fields) {
-  
-   if (!err && rows.length > 0 )
-    {    
-          var obj= '{"message":"The action was successful","product":[';    
-          var results = [];
-          var prod = [];
-          for(var i =0; i< rows.length; i++)
-          {    
-              prod= rows[i].productName.split(',');
-              var temp= '{"asin":"'+rows[i].asin+'","productName":"'+prod[0]+'"}';
-              results.push(temp);
-          }
-          obj=obj+results+']}';
-          res.setHeader('Content-Type', 'application/json');
-          return res.send(obj);
-    }            
-
-   else          
-    {      
-       prodstring = prodstring.slice(0,-2);
-       prodstring += 'limit 10;';
-       console.log("prodstring"+prodstring);
-       var queries = readconnection.query(prodstring, function(err, rows, fields) {
-        
-       if (rows.length > 0 )
-        {    
-          var obj= '{"message":"The action was successful","product":[';    
-          var results = [];
-          var prod = [];
-          for(var i =0; i< rows.length; i++)
-          {    
-              prod= rows[i].productName.split(',');
-              var temp= '{"asin":"'+rows[i].asin+'","productName":"'+prod[0]+'"}';
-              results.push(temp);
-          }
-          obj=obj+results+']}';
-          res.setHeader('Content-Type', 'application/json');
-          return res.send(obj);
-        }            
-        
-        else {
-         
-      var obj= '{"message":"There are no products that match that criteria"}';
-      res.setHeader('Content-Type', 'application/json');
-      return res.send(obj);    
-        }
-       });        
-          
-    } 
- });
-  readconnection.release();
-}); 
-
- (req,res,next);
-});
-
-/*app.post( '/viewProducts',  function(req, res, next) { 
-var params =[req.body.asin,req.body.keyword,req.body.group];
-var pin= req.body.asin;
-var key= req.body.keyword;
-var grp = req.body.group;
 var querystring;
 
 
@@ -722,7 +639,7 @@ var queries = readconnection.query(querystring, function(err, rows, fields) {
  readconnection.release();
 }); 
  (req,res,next);
-});*/
+});
 
 /*app.post( '/viewProducts',  function(req, res, next) { 
 var params =[req.body.asin,req.body.keyword,req.body.group];
